@@ -2,11 +2,22 @@
 
 This repo demonstrates how to use GitHub Actions to automatically comment on a PR with a download link to the artifact produced by the workflow.
 
+![](/assets/banner.png)
+
 ## Description
 
-In the pursuit of perfect automation, having build artifacts from Github pipelines be available at your fingertips is an impressive quality-of-life improvement for developers. If you've used Github Actions, you know that build artifacts are easily accessible to download after drilling down into an individual workflow run. But when you're reviewing code in a PR, this requires three clicks from a code review going to Actions -> Build -> Download Artifact. I've always wanted to get this click count down to one, and in this post, I'll show you how I did it. After setting up this Github Action, you'll have a comment on your PR with a download link to all of the individual artifacts produced by the workflow!
+In the pursuit of perfect automation, having build artifacts from Github pipelines be available at your fingertips is an impressive quality-of-life improvement for developers. If you've used Github Actions, you know that build artifacts are easily accessible to download after drilling down into an individual workflow run. But when you're reviewing code in a PR, this requires three clicks from a code review going to Actions -> Build -> Download Artifact.
 
-## When this really shines
+![](/assets/actions.png)
+
+
+I've always wanted to get this click count down to one, and in this post, I'll show you how I did it.
+
+After setting up this Github Action, you'll have a fully automated comment on your PR with a download link to all of the individual artifacts produced by the workflow!
+
+![](/assets/comment.png)
+
+## When This Really Shines
 
 Some people believe that going from three clicks to one isn't justifiable for the effort required. But really, any automation task is looking at the long-run. If you're only dealing with a single artifact, then sure, it may not be necessary. But on projects where you need multiple artifacts produced, and multiple actions running them, this consolidates your artifacts into a single PR comment.
 
@@ -102,7 +113,11 @@ So what I've done is use the Github API to its fullest, and inject code into the
       });
 ```
 
-And voila! Whenever you make a PR, the action will run, upload the artifact, and comment on the PR with a download link to the artifact. You can take a look at the example in this repo which has even more code in the build script that handles:
+And voila! Whenever you make a PR, the action will run, upload the artifact, and comment on the PR with a download link to the artifact. Another added bonus is that when an action comments on your PR, you'll get an email with the contents, meaning that you can download your artifacts from emails too!
+
+![](/assets/email.png)
+
+You can take a look at the example in [this repo](https://github.com/DaveAldon/PR-Artifact-Comments) which has even more code in the build script that handles:
 
 1. Creating a comment template with "in progress" statuses for other asynchronous actions
 2. Searches for a bot comment and replaces it with the new download link
