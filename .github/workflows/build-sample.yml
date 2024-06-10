@@ -1,0 +1,94 @@
+name: Example Build
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  build:
+    name: Build on Github Cloud Runner
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      pull-requests: write
+      issues: read
+    steps:
+      - name: Setup repo
+        uses: actions/checkout@v4
+
+      - name: Create a sample text file
+        run: echo "Sample content for artifact" > sample.txt
+
+      - name: Upload Artifact
+        uses: actions/upload-artifact@v2
+        id: sample-artifact
+        with:
+          name: sample-artifact
+          if-no-files-found: error
+          retention-days: 14
+          path: ${{ github.workspace }}/sample.txt
+
+      - name: Output artifact ID
+        run: echo "SAMPLE_ARTIFACT_ID=${{ steps.sample-artifact.outputs.artifact-id }}" >> $GITHUB_ENV
+
+      - name: Comment PR
+        uses: actions/github-script@v7.0.1
+        if: success()
+        with:
+          github-token: ${{secrets.GITHUB_TOKEN}}
+          script: |
+            const sample_artifact_id = process.env.SAMPLE_ARTIFACT_ID;
+
+            const issue_number = context.issue.number;
+            const run_id = context.runId;
+            const repo = context.repo;
+
+            // Merges to main branch do not have an associated issue number
+            if(!issue_number) {
+              return;
+            }
+
+            const development_link = `https://github.com/${repo.owner}/${repo.repo}/actions/runs/${run_id}/artifacts/${sample_artifact_id}`
+
+            const commentTemplate = `
+              ## ✅ Build Artifacts 😍
+
+              | Build Name | Download Link |
+              | --- | --- |
+              | 🌎 Artifact Download | [🌎 In-Progress] |
+            `;
+
+            // Get all comments of the issue
+            const comments = await github.rest.issues.listComments({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: issue_number
+            });
+
+            // Find a comment that contains some text from the template
+            const botComment = comments.data.find(comment => comment.user.login === 'github-actions[bot]' && comment.body.includes('✅ Build Artifacts 😍'));
+            let comment = commentTemplate;
+
+            if (botComment) {
+              // Replace the values in the second column of the table for the simulator and distribution rows
+              comment = botComment.body.replace(/(\| 🌎 Artifact Download \| )[^\n]*/, `$1[Download](${development_link})`);
+
+              // If a comment from the GitHub Actions bot exists, delete it
+              await github.rest.issues.deleteComment({
+                owner: repo.owner,
+                repo: repo.repo,
+                comment_id: botComment.id
+              });
+            } else {
+              comment = comment.replace(/(\| 🌎 Artifact Download \| )[^\n]*/, `$1[Download](${development_link})`);
+            }
+
+            // Create a new comment
+            await github.rest.issues.createComment({
+              owner: repo.owner,
+              repo: repo.repo,
+              issue_number: issue_number,
+              body: comment
+            });
