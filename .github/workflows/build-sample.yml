@@ -16,13 +16,13 @@ jobs:
       issues: read
     steps:
       - name: Setup repo
-        uses: actions/checkout@v4
+        uses: actions/checkout@v4.1.6
 
       - name: Create a sample text file
         run: echo "Sample content for artifact" > sample.txt
 
       - name: Upload Artifact
-        uses: actions/upload-artifact@v2
+        uses: actions/upload-artifact@v4.3.3
         id: sample-artifact
         with:
           name: sample-artifact
