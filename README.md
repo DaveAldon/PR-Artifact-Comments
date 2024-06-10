@@ -30,6 +30,8 @@ For example, with React Native projects, in a production environment we're deali
 
 In my case, I use in-house runners to kick off iOS builds, and Github cloud runners for Android. These can both run in parallel, but the artifacts end up in different runs. Instead, through automation, we can get all of these artifacts into a single PR comment that self-updates with the asynchronous workflow runs.
 
+You can see an example of this in action in [this PR](https://github.com/DaveAldon/PR-Artifact-Comments/pull/2).
+
 ## How it works
 
 You may be thinking that you could just use an existing action from the Github marketplace to do this. And there may be some that work, but I've had no such luck, and I don't want to pay for anything. So starting with that assumption, let's begin by inspecting what an artifact really is. All we need is a link to the artifact, so let's take a look at one:
